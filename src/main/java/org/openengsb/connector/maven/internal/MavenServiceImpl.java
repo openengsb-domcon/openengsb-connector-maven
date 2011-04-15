@@ -33,8 +33,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openengsb.core.api.AliveState;
 import org.openengsb.core.api.context.ContextCurrentService;
 import org.openengsb.core.common.AbstractOpenEngSBService;
@@ -50,12 +48,14 @@ import org.openengsb.domain.test.TestDomainEvents;
 import org.openengsb.domain.test.TestFailEvent;
 import org.openengsb.domain.test.TestStartEvent;
 import org.openengsb.domain.test.TestSuccessEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MavenServiceImpl extends AbstractOpenEngSBService implements MavenDomain {
 
     private static final String MVN_COMMAND = "mvn" + addSystemEnding();
     private static final int MAX_LOG_FILES = 5;
-    private Log log = LogFactory.getLog(this.getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(MavenServiceImpl.class);
     private String projectPath;
 
     private BuildDomainEvents buildEvents;
@@ -257,16 +257,16 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements MavenD
         try {
             return runMaven(dir, command);
         } catch (IOException e) {
-            log.error(e);
+            LOGGER.error(e.getMessage(), e);
             return new MavenResult(false, e.getMessage());
         } catch (InterruptedException e) {
-            log.error(e);
+            LOGGER.error(e.getMessage(), e);
             return new MavenResult(false, e.getMessage());
         }
     }
 
     private MavenResult runMaven(File dir, List<String> command) throws IOException, InterruptedException {
-        log.info("running '" + command + "' in directory '" + dir.getPath() + "'");
+        LOGGER.info("running '{}' in directory '{}'", command, dir.getPath());
         Process process = configureProcess(dir, command);
         Future<String> outputFuture = configureProcessOutputReader(process);
         Future<String> errorFuture = configureProcessErrorReader(process);
@@ -274,9 +274,9 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements MavenD
         String outputResult = readResultFromFuture(outputFuture);
         String errorResult = readResultFromFuture(errorFuture);
         if (!errorResult.isEmpty()) {
-            log.warn("Maven connector error stream output: " + errorResult);
+            LOGGER.warn("Maven connector error stream output: {}", errorResult);
         }
-        log.info("maven exited with status " + processResultCode);
+        LOGGER.info("maven exited with status {}", processResultCode);
         return new MavenResult(processResultCode, outputResult);
     }
 
@@ -307,7 +307,7 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements MavenD
         try {
             result = future.get();
         } catch (ExecutionException e) {
-            log.error(e.getCause());
+            LOGGER.error(e.getMessage(), e.getCause());
             result = ExceptionUtils.getFullStackTrace(e);
         }
         return result;

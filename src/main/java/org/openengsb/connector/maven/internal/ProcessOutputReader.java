@@ -28,8 +28,8 @@ import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.util.concurrent.Callable;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class writing an inputStream (mostly from an process) always into a string and optionally into a log file, if
@@ -37,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class ProcessOutputReader implements Callable<String> {
 
-    private Log log = LogFactory.getLog(getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessOutputReader.class);
 
     private InputStream inputStream;
 
@@ -58,11 +58,11 @@ public class ProcessOutputReader implements Callable<String> {
 
     @Override
     public String call() throws IOException {
-        log.debug("starting reading inputstream");
+        LOGGER.debug("starting reading inputstream");
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         readInputStream(bufferedReader);
         closeResources();
-        log.debug("inputstream has ended. returning result");
+        LOGGER.debug("inputstream has ended. returning result");
         return writer.toString();
     }
 
@@ -82,7 +82,7 @@ public class ProcessOutputReader implements Callable<String> {
     }
 
     private void closeResources() throws IOException {
-        log.debug("Input stream has ended. cleanup resources");
+        LOGGER.debug("Input stream has ended. cleanup resources");
         writer.close();
         if (logFileWriter != null) {
             logFileWriter.close();
