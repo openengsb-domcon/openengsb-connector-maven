@@ -17,20 +17,16 @@
 
 package org.openengsb.connector.maven.internal;
 
-import java.util.Collections;
 import java.util.Map;
 
-import org.openengsb.core.api.ServiceInstanceFactory;
+import org.openengsb.core.api.Domain;
 import org.openengsb.core.api.context.ContextCurrentService;
-import org.openengsb.core.api.descriptor.ServiceDescriptor;
-import org.openengsb.core.api.descriptor.ServiceDescriptor.Builder;
-import org.openengsb.core.api.validation.MultipleAttributeValidationResult;
-import org.openengsb.core.api.validation.MultipleAttributeValidationResultImpl;
+import org.openengsb.core.common.AbstractConnectorInstanceFactory;
 import org.openengsb.domain.build.BuildDomainEvents;
 import org.openengsb.domain.deploy.DeployDomainEvents;
 import org.openengsb.domain.test.TestDomainEvents;
 
-public class MavenServiceInstanceFactory implements ServiceInstanceFactory<MavenDomain, MavenServiceImpl> {
+public class MavenServiceInstanceFactory extends AbstractConnectorInstanceFactory<MavenServiceImpl> {
 
     private BuildDomainEvents buildEvents;
 
@@ -40,50 +36,24 @@ public class MavenServiceInstanceFactory implements ServiceInstanceFactory<Maven
 
     private ContextCurrentService contextService;
 
-    public MavenServiceInstanceFactory() {
+    @Override
+    public Domain createNewInstance(String id) {
+        MavenServiceImpl service = new MavenServiceImpl(id);
+        service.setBuildEvents(buildEvents);
+        service.setTestEvents(testEvents);
+        service.setDeployEvents(deployEvents);
+        service.setContextService(contextService);
+        return new MavenServiceImpl(id);
     }
 
     @Override
-    public void updateServiceInstance(MavenServiceImpl instance, Map<String, String> attributes) {
+    public void doApplyAttributes(MavenServiceImpl instance, Map<String, String> attributes) {
         if (attributes.containsKey("projectPath")) {
             instance.setProjectPath(attributes.get("projectPath"));
         }
         if (attributes.containsKey("command")) {
             instance.setCommand(attributes.get("command"));
         }
-    }
-
-    @Override
-    public MavenServiceImpl createServiceInstance(String id, Map<String, String> attributes) {
-        MavenServiceImpl service = new MavenServiceImpl(id);
-        service.setBuildEvents(buildEvents);
-        service.setTestEvents(testEvents);
-        service.setDeployEvents(deployEvents);
-        service.setContextService(contextService);
-        updateServiceInstance(service, attributes);
-        return service;
-    }
-
-    @Override
-    public ServiceDescriptor getDescriptor(Builder builder) {
-        builder.name("service.name").description("service.description");
-        builder.attribute(builder.newAttribute().id("projectPath").name("service.projectPath.name")
-            .description("service.projectPath.description").required().build());
-        builder.attribute(builder.newAttribute().id("command").name("service.command.name")
-            .description("service.command.description").required().build());
-        return builder.build();
-    }
-
-    @Override
-    public MultipleAttributeValidationResult updateValidation(MavenServiceImpl instance, Map<String, String> attr) {
-        Map<String, String> emptyMap = Collections.emptyMap();
-        return new MultipleAttributeValidationResultImpl(true, emptyMap);
-    }
-
-    @Override
-    public MultipleAttributeValidationResult createValidation(String id, Map<String, String> attributes) {
-        Map<String, String> emptyMap = Collections.emptyMap();
-        return new MultipleAttributeValidationResultImpl(true, emptyMap);
     }
 
     public void setBuildEvents(BuildDomainEvents buildEvents) {

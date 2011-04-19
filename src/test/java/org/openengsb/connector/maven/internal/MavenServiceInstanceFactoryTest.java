@@ -42,7 +42,8 @@ public class MavenServiceInstanceFactoryTest {
 
         Map<String, String> attributes = new HashMap<String, String>();
         attributes.put("projectPath", "someValue");
-        MavenServiceImpl mavenService = factory.createServiceInstance("id", attributes);
+        MavenServiceImpl mavenService = (MavenServiceImpl) factory.createNewInstance("id");
+        factory.applyAttributes(mavenService, attributes);
 
         Assert.assertNotNull(mavenService);
     }

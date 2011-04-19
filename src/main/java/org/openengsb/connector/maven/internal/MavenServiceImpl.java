@@ -36,14 +36,17 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.openengsb.core.api.AliveState;
 import org.openengsb.core.api.context.ContextCurrentService;
 import org.openengsb.core.common.AbstractOpenEngSBService;
+import org.openengsb.domain.build.BuildDomain;
 import org.openengsb.domain.build.BuildDomainEvents;
 import org.openengsb.domain.build.BuildFailEvent;
 import org.openengsb.domain.build.BuildStartEvent;
 import org.openengsb.domain.build.BuildSuccessEvent;
+import org.openengsb.domain.deploy.DeployDomain;
 import org.openengsb.domain.deploy.DeployDomainEvents;
 import org.openengsb.domain.deploy.DeployFailEvent;
 import org.openengsb.domain.deploy.DeployStartEvent;
 import org.openengsb.domain.deploy.DeploySuccessEvent;
+import org.openengsb.domain.test.TestDomain;
 import org.openengsb.domain.test.TestDomainEvents;
 import org.openengsb.domain.test.TestFailEvent;
 import org.openengsb.domain.test.TestStartEvent;
@@ -51,7 +54,7 @@ import org.openengsb.domain.test.TestSuccessEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MavenServiceImpl extends AbstractOpenEngSBService implements MavenDomain {
+public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildDomain, TestDomain, DeployDomain {
 
     private static final String MVN_COMMAND = "mvn" + addSystemEnding();
     private static final int MAX_LOG_FILES = 5;
