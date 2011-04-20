@@ -15,6 +15,8 @@ public class MavenConnectorProvider extends AbstractConnectorProvider {
             .description("service.projectPath.description").required().build());
         builder.attribute(builder.newAttribute().id("command").name("service.command.name")
             .description("service.command.description").required().build());
+        builder.attribute(builder.newAttribute().id("mvnVersion").name("service.mvnVersion.name")
+                .description("service.mvnVersion.description").required().build());
         return builder.build();
     }
 

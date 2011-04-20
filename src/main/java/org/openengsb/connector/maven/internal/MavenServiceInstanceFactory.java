@@ -54,6 +54,9 @@ public class MavenServiceInstanceFactory extends AbstractConnectorInstanceFactor
         if (attributes.containsKey("command")) {
             instance.setCommand(attributes.get("command"));
         }
+        if (attributes.containsKey("mvnVersion")) {
+            instance.setCommand(attributes.get("mvnVersion"));
+        }
     }
 
     public void setBuildEvents(BuildDomainEvents buildEvents) {
