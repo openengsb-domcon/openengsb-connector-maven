@@ -23,9 +23,9 @@
   xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.0.0 http://karaf.apache.org/xmlns/features/v1.0.0" >
   <feature name="openengsb-connector-maven" version="${project.version}">
     <feature version="${openengsb.version.range}">openengsb-core</feature>
-    <feature version="${openengsb.version.range}">openengsb-domain-build</feature>
-    <feature version="${openengsb.version.range}">openengsb-domain-test</feature>
-    <feature version="${openengsb.version.range}">openengsb-domain-deploy</feature>
+    <feature version="${openengsb.domain.build.range}">openengsb-domain-build</feature>
+    <feature version="${openengsb.domain.test.range}">openengsb-domain-test</feature>
+    <feature version="${openengsb.domain.deploy.range}">openengsb-domain-deploy</feature>
     <bundle>mvn:org.openengsb.connector/openengsb-connector-maven/${project.version}</bundle>
   </feature>
 </features>
