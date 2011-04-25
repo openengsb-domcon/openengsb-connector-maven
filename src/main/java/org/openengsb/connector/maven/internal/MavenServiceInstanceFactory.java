@@ -55,7 +55,8 @@ public class MavenServiceInstanceFactory extends AbstractConnectorInstanceFactor
             instance.setCommand(attributes.get("command"));
         }
         if (attributes.containsKey("mvnVersion")) {
-            instance.setCommand(attributes.get("mvnVersion"));
+            instance.setMvnVersion(attributes.get("mvnVersion"));
+            
         }
     }
 

@@ -36,7 +36,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.zip.ZipException;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
@@ -66,8 +65,8 @@ import org.slf4j.LoggerFactory;
 
 public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildDomain, TestDomain, DeployDomain {
 
-    private String mvnVersion = "3.0.3";
-    private String mvnCommand = new File(System.getProperty("karaf.data")).getAbsolutePath() + "/apache-maven-"
+    private String mvnVersion = "";
+    private String mvnCommand = FileUtils.getTempDirectoryPath() + "/apache-maven-"
             + mvnVersion + "/bin/mvn" + addSystemEnding();
     private static final int MAX_LOG_FILES = 5;
     private static final Logger LOGGER = LoggerFactory.getLogger(MavenServiceImpl.class);
@@ -98,35 +97,39 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
         } else if (!logDir.isDirectory()) {
             throw new IllegalStateException("cannot access log-directory");
         }
-        
-        if (!isMavenInstalled()) {
-            try {
-                installMaven();
-            } catch (Exception e) {
-                LOGGER.error(e.toString());
-            }
-        }
-        new File(mvnCommand).setExecutable(true);
-    }
 
-    private List<String> getListOfMirrors() {
+        if (!mvnVersion.equals("")) {
+            if (!isMavenInstalled()) {
+                try {
+                    installMaven();
+                } catch (Exception e) {
+                    throw new IllegalStateException();
+                }
+            }
+            new File(mvnCommand).setExecutable(true);
+        } else {
+            mvnCommand = "mvn" + addSystemEnding();
+        }
+    }
+    
+
+    private List<String> getListOfMirrors() throws IOException {
         Properties prop = new Properties();
         List<String> mirrorList = new ArrayList<String>();
-        try {
-            prop.load(ClassLoader.getSystemResourceAsStream("config.properties"));
 
-            int i = 1;
-            while (prop.getProperty("mirror" + i) != null) {
-                mirrorList.add(prop.getProperty("mirror" + i));
-                i++;
-            }
-        } catch (IOException e) {
+        prop.load(ClassLoader.getSystemResourceAsStream("config.properties"));
+
+        int i = 1;
+        while (prop.getProperty("mirror" + i) != null) {
+            mirrorList.add(prop.getProperty("mirror" + i));
+            i++;
         }
+
         return mirrorList;
     }
 
     public Boolean isMavenInstalled() {
-        if (new File(System.getProperty("karaf.data") + "/apache-maven-" + mvnVersion).exists()) {
+        if (new File(FileUtils.getTempDirectoryPath() + "/apache-maven-" + mvnVersion).exists()) {
             return true;
         }
         return false;
@@ -140,60 +143,58 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
             FileUtils.writeByteArrayToFile(new File(downloadPath), IOUtils.toByteArray(in));
             return true;
         } catch (IOException e) {
-            LOGGER.error(e.toString());
+            LOGGER.error(e.getMessage(), e);
             return false;
         } finally {
             IOUtils.closeQuietly(in);
         }
     }
 
-    public void installMaven() throws Exception {
+    public void installMaven() throws IOException {
         File tmp = File.createTempFile("mvn_setup", "zip");
-        List<?> mirrors = getListOfMirrors();
+        List<String> mirrors = getListOfMirrors();
+
+        if (mirrors.size() == 0 || !downloadFromAnyMirror(tmp, mirrors)) {
+            throw new RuntimeException("Maven download not possible");
+        }
+        
+        unzipFile(tmp.getAbsolutePath(), FileUtils.getTempDirectoryPath());
+    }
+
+    private boolean downloadFromAnyMirror(File tmp, List<?> mirrors) {
         for (int i = 0; i < mirrors.size(); i++) {
             if (download(String.valueOf(mirrors.get(i)) + "apache-maven-" + mvnVersion + "-bin.zip",
                     tmp.getAbsolutePath())) {
-                break;
-            }
-
-            if (i == mirrors.size() - 1) {
-                LOGGER.error("No valid mirror found!");
+                return true;
             }
         }
-        if (mirrors.size() != 0) {
-            unzipFile(tmp.getAbsolutePath(), System.getProperty("karaf.data"));
-        }
+        return false;
     }
 
-    public void unzipFile(String archivePath, String targetPath) throws Exception {
-        try {
-            File archiveFile = new File(archivePath);
-            File targetFile = new File(targetPath);
-            ZipFile zipFile = new ZipFile(archiveFile);
-            Enumeration<?> e = zipFile.getEntries();
-            while (e.hasMoreElements()) {
-                ZipArchiveEntry zipEntry = (ZipArchiveEntry) e.nextElement();
-                File file = new File(targetFile, zipEntry.getName());
-                if (zipEntry.isDirectory()) {
-                    FileUtils.forceMkdir(file);
-                } else {
-                    InputStream is = zipFile.getInputStream(zipEntry);
-                    FileOutputStream os = FileUtils.openOutputStream(file);
-                    try {
-                        IOUtils.copy(is, os);
-                    } finally {
-                        os.close();
-                        is.close();
-                    }
+    public void unzipFile(String archivePath, String targetPath) throws IOException {
+        File archiveFile = new File(archivePath);
+        File targetFile = new File(targetPath);
+        ZipFile zipFile = new ZipFile(archiveFile);
+        Enumeration<?> e = zipFile.getEntries();
+        while (e.hasMoreElements()) {
+            ZipArchiveEntry zipEntry = (ZipArchiveEntry) e.nextElement();
+            File file = new File(targetFile, zipEntry.getName());
+            if (zipEntry.isDirectory()) {
+                FileUtils.forceMkdir(file);
+            } else {
+                InputStream is = zipFile.getInputStream(zipEntry);
+                FileOutputStream os = FileUtils.openOutputStream(file);
+                try {
+                    IOUtils.copy(is, os);
+                } finally {
+                    os.close();
+                    is.close();
                 }
             }
-        } catch (ZipException e) {
-            throw new Exception(e);
-        } catch (IOException e) {
-            throw new Exception(e);
         }
+        zipFile.close();
     }
-    
+
     private static String addSystemEnding() {
         if (System.getProperty("os.name").contains("Windows")) {
             return ".bat";
@@ -442,6 +443,19 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
             }
         });
         return logFiles[0].delete();
+    }
+
+    public void setMvnVersion(String mvnVersion) {
+        String tmpMvnVersion = this.mvnVersion;
+        this.mvnVersion = mvnVersion;
+        try {
+            installMaven();
+        } catch (IOException e) {
+            this.mvnVersion = tmpMvnVersion;
+            throw new RuntimeException(e);
+        }
+        mvnCommand = FileUtils.getTempDirectoryPath() + "/apache-maven-" + mvnVersion
+                + "/bin/mvn" + addSystemEnding();
     }
 
     public void setBuildEvents(BuildDomainEvents buildEvents) {
