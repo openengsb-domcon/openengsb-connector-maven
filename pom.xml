@@ -32,11 +32,11 @@
     <bundle.symbolicName>org.openengsb.connector.maven</bundle.symbolicName>
     <bundle.namespace>org.openengsb.connector.maven</bundle.namespace>
     <openengsb.domain.deploy.version>1.2.0-SNAPSHOT</openengsb.domain.deploy.version>
-    <openengsb.domain.deploy.range>(1.2.0,1.3.0]</openengsb.domain.deploy.range>
+    <openengsb.domain.deploy.range>[1.2,1.3)</openengsb.domain.deploy.range>
     <openengsb.domain.build.version>1.2.0-SNAPSHOT</openengsb.domain.build.version>
-    <openengsb.domain.build.range>(1.2.0,1.3.0]</openengsb.domain.build.range>
+    <openengsb.domain.build.range>[1.2,1.3)</openengsb.domain.build.range>
     <openengsb.domain.test.version>1.2.0-SNAPSHOT</openengsb.domain.test.version>
-    <openengsb.domain.test.range>(1.2.0,1.3.0]</openengsb.domain.test.range>
+    <openengsb.domain.test.range>[1.2,1.3)</openengsb.domain.test.range>
   </properties>
 
   <groupId>org.openengsb.connector</groupId>
