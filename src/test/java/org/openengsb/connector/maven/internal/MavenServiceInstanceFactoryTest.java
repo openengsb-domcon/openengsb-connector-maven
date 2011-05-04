@@ -24,6 +24,7 @@ import java.util.Map;
 
 import junit.framework.Assert;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.openengsb.core.api.context.ContextCurrentService;
 import org.openengsb.domain.build.BuildDomainEvents;
@@ -34,7 +35,7 @@ public class MavenServiceInstanceFactoryTest {
 
     @Test
     public void testCreatePlaintextReportService() throws Exception {
-        System.setProperty("karaf.data", ".");
+        System.setProperty("karaf.data", FileUtils.getTempDirectoryPath());
         MavenServiceInstanceFactory factory = new MavenServiceInstanceFactory();
         factory.setBuildEvents(mock(BuildDomainEvents.class));
         factory.setTestEvents(mock(TestDomainEvents.class));

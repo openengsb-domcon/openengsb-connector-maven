@@ -17,6 +17,8 @@
 
 package org.openengsb.connector.maven.internal;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 import java.util.HashMap;
@@ -24,6 +26,7 @@ import java.util.Map;
 
 import junit.framework.Assert;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.openengsb.core.api.context.ContextCurrentService;
 import org.openengsb.domain.build.BuildDomainEvents;
@@ -32,8 +35,8 @@ import org.openengsb.domain.test.TestDomainEvents;
 
 public class MavenServiceTestUT {
     @Test
-    public void testCreatePlaintextReportService() throws Exception {
-        System.setProperty("karaf.data", ".");
+    public void testInstallMavenIfNotAlreadyInstalled() throws Exception {
+        System.setProperty("karaf.data", FileUtils.getTempDirectoryPath());
         MavenServiceInstanceFactory factory = new MavenServiceInstanceFactory();
         factory.setBuildEvents(mock(BuildDomainEvents.class));
         factory.setTestEvents(mock(TestDomainEvents.class));
@@ -48,5 +51,6 @@ public class MavenServiceTestUT {
         factory.applyAttributes(mavenService, attributes);
 
         Assert.assertNotNull(mavenService);
+        assertThat(mavenService.isMavenInstalled(), is(true));
     }
 }

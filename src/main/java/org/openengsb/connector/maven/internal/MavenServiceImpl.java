@@ -66,8 +66,7 @@ import org.slf4j.LoggerFactory;
 public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildDomain, TestDomain, DeployDomain {
 
     private String mvnVersion = "";
-    private String mvnCommand = FileUtils.getTempDirectoryPath() + "/apache-maven-"
-            + mvnVersion + "/bin/mvn" + addSystemEnding();
+    private String mvnCommand;
     private static final int MAX_LOG_FILES = 5;
     private static final Logger LOGGER = LoggerFactory.getLogger(MavenServiceImpl.class);
     private String projectPath;
@@ -106,7 +105,6 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
                     throw new IllegalStateException();
                 }
             }
-            new File(mvnCommand).setExecutable(true);
         } else {
             mvnCommand = "mvn" + addSystemEnding();
         }
@@ -129,7 +127,7 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
     }
 
     public Boolean isMavenInstalled() {
-        if (new File(FileUtils.getTempDirectoryPath() + "/apache-maven-" + mvnVersion).exists()) {
+        if (new File(System.getProperty("karaf.data") + "/apache-maven-" + mvnVersion).exists()) {
             return true;
         }
         return false;
@@ -154,11 +152,16 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
         File tmp = File.createTempFile("mvn_setup", "zip");
         List<String> mirrors = getListOfMirrors();
 
-        if (mirrors.size() == 0 || !downloadFromAnyMirror(tmp, mirrors)) {
-            throw new RuntimeException("Maven download not possible");
+        if (mirrors.size() == 0) {
+            throw new RuntimeException("Maven download not possible, because there are no mirrors specified");
+        } else if (!downloadFromAnyMirror(tmp, mirrors)) {
+            throw new RuntimeException("Maven download not possible, because there are no available mirrors");
+
         }
         
-        unzipFile(tmp.getAbsolutePath(), FileUtils.getTempDirectoryPath());
+        unzipFile(tmp.getAbsolutePath(), System.getProperty("karaf.data"));
+        
+        new File(mvnCommand).setExecutable(true);
     }
 
     private boolean downloadFromAnyMirror(File tmp, List<?> mirrors) {
@@ -454,7 +457,7 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
             this.mvnVersion = tmpMvnVersion;
             throw new RuntimeException(e);
         }
-        mvnCommand = FileUtils.getTempDirectoryPath() + "/apache-maven-" + mvnVersion
+        mvnCommand = System.getProperty("karaf.data") + "/apache-maven-" + mvnVersion
                 + "/bin/mvn" + addSystemEnding();
     }
 
