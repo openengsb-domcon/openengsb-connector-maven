@@ -96,7 +96,11 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
     }
 
     void setProjectPath(String projectPath) {
-        this.projectPath = projectPath.replaceAll("%20", " ");
+        if (projectPath.substring(1, 2).equals(":\\") || projectPath.startsWith("/")) {
+            this.projectPath = projectPath.replaceAll("%20", " ");
+        } else {
+            this.projectPath = System.getProperty("karaf.data") + "/" + projectPath.replaceAll("%20", " ");
+        }
     }
 
     @Override
