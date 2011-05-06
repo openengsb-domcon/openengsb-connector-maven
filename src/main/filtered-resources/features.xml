@@ -27,6 +27,7 @@
     <feature version="${openengsb.domain.test.range}">openengsb-domain-test</feature>
     <feature version="${openengsb.domain.deploy.range}">openengsb-domain-deploy</feature>
     <bundle>mvn:org.openengsb.connector/openengsb-connector-maven/${project.version}</bundle>
+    <bundle>mvn:org.apache.commons/commons-compress/${commons.compress.version}</bundle>
   </feature>
 </features>
 

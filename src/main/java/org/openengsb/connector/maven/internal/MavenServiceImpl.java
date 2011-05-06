@@ -18,13 +18,18 @@
 package org.openengsb.connector.maven.internal;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -32,6 +37,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.openengsb.core.api.AliveState;
 import org.openengsb.core.api.context.ContextCurrentService;
@@ -56,7 +65,8 @@ import org.slf4j.LoggerFactory;
 
 public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildDomain, TestDomain, DeployDomain {
 
-    private static final String MVN_COMMAND = "mvn" + addSystemEnding();
+    private String mvnVersion = "";
+    private String mvnCommand;
     private static final int MAX_LOG_FILES = 5;
     private static final Logger LOGGER = LoggerFactory.getLogger(MavenServiceImpl.class);
     private String projectPath;
@@ -86,6 +96,106 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
         } else if (!logDir.isDirectory()) {
             throw new IllegalStateException("cannot access log-directory");
         }
+
+        if (!mvnVersion.equals("")) {
+            if (!isMavenInstalled()) {
+                try {
+                    installMaven();
+                } catch (Exception e) {
+                    throw new IllegalStateException();
+                }
+            }
+        } else {
+            mvnCommand = "mvn" + addSystemEnding();
+        }
+    }
+    
+
+    private List<String> getListOfMirrors() throws IOException {
+        Properties prop = new Properties();
+        List<String> mirrorList = new ArrayList<String>();
+
+        prop.load(ClassLoader.getSystemResourceAsStream("config.properties"));
+
+        int i = 1;
+        while (prop.getProperty("mirror" + i) != null) {
+            mirrorList.add(prop.getProperty("mirror" + i));
+            i++;
+        }
+
+        return mirrorList;
+    }
+
+    public Boolean isMavenInstalled() {
+        if (new File(System.getProperty("karaf.data") + "/apache-maven-" + mvnVersion).exists()) {
+            return true;
+        }
+        return false;
+
+    }
+
+    public boolean download(String url, String downloadPath) {
+        InputStream in = null;
+        try {
+            in = new URL(url).openStream();
+            FileUtils.writeByteArrayToFile(new File(downloadPath), IOUtils.toByteArray(in));
+            return true;
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+            return false;
+        } finally {
+            IOUtils.closeQuietly(in);
+        }
+    }
+
+    public void installMaven() throws IOException {
+        File tmp = File.createTempFile("mvn_setup", "zip");
+        List<String> mirrors = getListOfMirrors();
+
+        if (mirrors.size() == 0) {
+            throw new RuntimeException("Maven download not possible, because there are no mirrors specified");
+        } else if (!downloadFromAnyMirror(tmp, mirrors)) {
+            throw new RuntimeException("Maven download not possible, because there are no available mirrors");
+
+        }
+        
+        unzipFile(tmp.getAbsolutePath(), System.getProperty("karaf.data"));
+        
+        new File(mvnCommand).setExecutable(true);
+    }
+
+    private boolean downloadFromAnyMirror(File tmp, List<?> mirrors) {
+        for (int i = 0; i < mirrors.size(); i++) {
+            if (download(String.valueOf(mirrors.get(i)) + "apache-maven-" + mvnVersion + "-bin.zip",
+                    tmp.getAbsolutePath())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void unzipFile(String archivePath, String targetPath) throws IOException {
+        File archiveFile = new File(archivePath);
+        File targetFile = new File(targetPath);
+        ZipFile zipFile = new ZipFile(archiveFile);
+        Enumeration<?> e = zipFile.getEntries();
+        while (e.hasMoreElements()) {
+            ZipArchiveEntry zipEntry = (ZipArchiveEntry) e.nextElement();
+            File file = new File(targetFile, zipEntry.getName());
+            if (zipEntry.isDirectory()) {
+                FileUtils.forceMkdir(file);
+            } else {
+                InputStream is = zipFile.getInputStream(zipEntry);
+                FileOutputStream os = FileUtils.openOutputStream(file);
+                try {
+                    IOUtils.copy(is, os);
+                } finally {
+                    os.close();
+                    is.close();
+                }
+            }
+        }
+        zipFile.close();
     }
 
     private static String addSystemEnding() {
@@ -254,7 +364,7 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
         File dir = new File(projectPath);
 
         List<String> command = new ArrayList<String>();
-        command.add(MVN_COMMAND);
+        command.add(mvnCommand);
         command.addAll(Arrays.asList(goal.trim().split(" ")));
 
         try {
@@ -336,6 +446,19 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
             }
         });
         return logFiles[0].delete();
+    }
+
+    public void setMvnVersion(String mvnVersion) {
+        String tmpMvnVersion = this.mvnVersion;
+        this.mvnVersion = mvnVersion;
+        try {
+            installMaven();
+        } catch (IOException e) {
+            this.mvnVersion = tmpMvnVersion;
+            throw new RuntimeException(e);
+        }
+        mvnCommand = System.getProperty("karaf.data") + "/apache-maven-" + mvnVersion
+                + "/bin/mvn" + addSystemEnding();
     }
 
     public void setBuildEvents(BuildDomainEvents buildEvents) {
