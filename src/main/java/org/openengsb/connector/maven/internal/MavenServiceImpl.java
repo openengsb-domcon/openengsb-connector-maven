@@ -65,10 +65,12 @@ import org.slf4j.LoggerFactory;
 
 public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildDomain, TestDomain, DeployDomain {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MavenServiceImpl.class);
+
+    private static final int MAX_LOG_FILES = 5;
+
     private String mvnVersion = "";
     private String mvnCommand;
-    private static final int MAX_LOG_FILES = 5;
-    private static final Logger LOGGER = LoggerFactory.getLogger(MavenServiceImpl.class);
     private String projectPath;
 
     private BuildDomainEvents buildEvents;
@@ -97,19 +99,18 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
             throw new IllegalStateException("cannot access log-directory");
         }
 
-        if (!mvnVersion.equals("")) {
+        if (!mvnVersion.isEmpty()) {
             if (!isMavenInstalled()) {
                 try {
                     installMaven();
-                } catch (Exception e) {
-                    throw new IllegalStateException();
+                } catch (IOException e) {
+                    throw new IllegalStateException(e);
                 }
             }
         } else {
             mvnCommand = "mvn" + addSystemEnding();
         }
     }
-    
 
     private List<String> getListOfMirrors() throws IOException {
         Properties prop = new Properties();
@@ -127,54 +128,48 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
     }
 
     public Boolean isMavenInstalled() {
-        if (new File(System.getProperty("karaf.data") + "/apache-maven-" + mvnVersion).exists()) {
-            return true;
-        }
-        return false;
-
+        return new File(System.getProperty("karaf.data"), "apache-maven-" + mvnVersion).exists();
     }
 
-    public boolean download(String url, String downloadPath) {
-        InputStream in = null;
+    public boolean download(String urlString, File tmp) {
         try {
-            in = new URL(url).openStream();
-            FileUtils.writeByteArrayToFile(new File(downloadPath), IOUtils.toByteArray(in));
-            return true;
+            URL url = new URL(urlString);
+            FileUtils.copyURLToFile(url, tmp);
         } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
+            LOGGER.error("could not download maven from mirror " + urlString, e);
             return false;
-        } finally {
-            IOUtils.closeQuietly(in);
         }
+        return true;
     }
 
     public void installMaven() throws IOException {
         File tmp = File.createTempFile("mvn_setup", "zip");
         List<String> mirrors = getListOfMirrors();
 
-        if (mirrors.size() == 0) {
-            throw new RuntimeException("Maven download not possible, because there are no mirrors specified");
+        if (mirrors.isEmpty()) {
+            throw new IllegalStateException(
+                    "Maven download not possible, because there are no mirrors specified");
         } else if (!downloadFromAnyMirror(tmp, mirrors)) {
-            throw new RuntimeException("Maven download not possible, because there are no available mirrors");
-
+            throw new IllegalStateException(
+                    "Maven download not possible, because there are no available mirrors");
         }
-        
+
         unzipFile(tmp.getAbsolutePath(), System.getProperty("karaf.data"));
-        
         new File(mvnCommand).setExecutable(true);
     }
 
-    private boolean downloadFromAnyMirror(File tmp, List<?> mirrors) {
-        for (int i = 0; i < mirrors.size(); i++) {
-            if (download(String.valueOf(mirrors.get(i)) + "apache-maven-" + mvnVersion + "-bin.zip",
-                    tmp.getAbsolutePath())) {
+    private boolean downloadFromAnyMirror(File tmp, List<String> mirrors) {
+        for (String mirrorBaseUrl : mirrors) {
+            String fullUrl = String.format("%sapache-maven-%s-bin.zip", mirrorBaseUrl, mvnVersion);
+            if (download(fullUrl, tmp)) {
                 return true;
             }
         }
         return false;
     }
 
-    public void unzipFile(String archivePath, String targetPath) throws IOException {
+    public void unzipFile(String archivePath, String targetPath)
+            throws IOException {
         File archiveFile = new File(archivePath);
         File targetFile = new File(targetPath);
         ZipFile zipFile = new ZipFile(archiveFile);
@@ -230,9 +225,11 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
                 MavenResult result = excuteCommand(command);
                 testEvents.raiseEvent(new TestStartEvent(id));
                 if (result.isSuccess()) {
-                    testEvents.raiseEvent(new TestSuccessEvent(id, result.getOutput()));
+                    testEvents.raiseEvent(new TestSuccessEvent(id, result
+                            .getOutput()));
                 } else {
-                    testEvents.raiseEvent(new TestFailEvent(id, result.getOutput()));
+                    testEvents.raiseEvent(new TestFailEvent(id, result
+                            .getOutput()));
                 }
             }
         };
@@ -250,9 +247,11 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
                 MavenResult result = excuteCommand(command);
                 testEvents.raiseEvent(new TestStartEvent(processId));
                 if (result.isSuccess()) {
-                    testEvents.raiseEvent(new TestSuccessEvent(processId, result.getOutput()));
+                    testEvents.raiseEvent(new TestSuccessEvent(processId,
+                            result.getOutput()));
                 } else {
-                    testEvents.raiseEvent(new TestFailEvent(processId, result.getOutput()));
+                    testEvents.raiseEvent(new TestFailEvent(processId, result
+                            .getOutput()));
                 }
             }
         };
@@ -270,9 +269,11 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
                 MavenResult result = excuteCommand(command);
                 buildEvents.raiseEvent(new BuildStartEvent(id));
                 if (result.isSuccess()) {
-                    buildEvents.raiseEvent(new BuildSuccessEvent(id, result.getOutput()));
+                    buildEvents.raiseEvent(new BuildSuccessEvent(id, result
+                            .getOutput()));
                 } else {
-                    buildEvents.raiseEvent(new BuildFailEvent(id, result.getOutput()));
+                    buildEvents.raiseEvent(new BuildFailEvent(id, result
+                            .getOutput()));
                 }
             }
         };
@@ -292,9 +293,11 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
                 buildStartEvent.setProcessId(processId);
                 buildEvents.raiseEvent(buildStartEvent);
                 if (result.isSuccess()) {
-                    buildEvents.raiseEvent(new BuildSuccessEvent(processId, result.getOutput()));
+                    buildEvents.raiseEvent(new BuildSuccessEvent(processId,
+                            result.getOutput()));
                 } else {
-                    buildEvents.raiseEvent(new BuildFailEvent(processId, result.getOutput()));
+                    buildEvents.raiseEvent(new BuildFailEvent(processId, result
+                            .getOutput()));
                 }
             }
         };
@@ -322,9 +325,11 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
                 MavenResult result = excuteCommand(command);
                 deployEvents.raiseEvent(new DeployStartEvent(id));
                 if (result.isSuccess()) {
-                    deployEvents.raiseEvent(new DeploySuccessEvent(id, result.getOutput()));
+                    deployEvents.raiseEvent(new DeploySuccessEvent(id, result
+                            .getOutput()));
                 } else {
-                    deployEvents.raiseEvent(new DeployFailEvent(id, result.getOutput()));
+                    deployEvents.raiseEvent(new DeployFailEvent(id, result
+                            .getOutput()));
                 }
             }
         };
@@ -342,9 +347,11 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
                 MavenResult result = excuteCommand(command);
                 deployEvents.raiseEvent(new DeployStartEvent(processId));
                 if (result.isSuccess()) {
-                    deployEvents.raiseEvent(new DeploySuccessEvent(processId, result.getOutput()));
+                    deployEvents.raiseEvent(new DeploySuccessEvent(processId,
+                            result.getOutput()));
                 } else {
-                    deployEvents.raiseEvent(new DeployFailEvent(processId, result.getOutput()));
+                    deployEvents.raiseEvent(new DeployFailEvent(processId,
+                            result.getOutput()));
                 }
 
             }
@@ -378,7 +385,8 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
         }
     }
 
-    private MavenResult runMaven(File dir, List<String> command) throws IOException, InterruptedException {
+    private MavenResult runMaven(File dir, List<String> command)
+            throws IOException, InterruptedException {
         LOGGER.info("running '{}' in directory '{}'", command, dir.getPath());
         Process process = configureProcess(dir, command);
         Future<String> outputFuture = configureProcessOutputReader(process);
@@ -393,18 +401,21 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
         return new MavenResult(processResultCode, outputResult);
     }
 
-    private Process configureProcess(File dir, List<String> command) throws IOException {
+    private Process configureProcess(File dir, List<String> command)
+            throws IOException {
         ProcessBuilder builder = new ProcessBuilder(command);
         Process process = builder.directory(dir).start();
         return process;
     }
 
     private Future<String> configureProcessErrorReader(Process process) {
-        ProcessOutputReader error = new ProcessOutputReader(process.getErrorStream());
+        ProcessOutputReader error = new ProcessOutputReader(
+                process.getErrorStream());
         return outputReaderPool.submit(error);
     }
 
-    private Future<String> configureProcessOutputReader(Process process) throws IOException {
+    private Future<String> configureProcessOutputReader(Process process)
+            throws IOException {
         ProcessOutputReader output;
         if (useLogFile) {
             File logFile = getNewLogFile();
@@ -415,7 +426,8 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
         return outputReaderPool.submit(output);
     }
 
-    private String readResultFromFuture(Future<String> future) throws InterruptedException {
+    private String readResultFromFuture(Future<String> future)
+            throws InterruptedException {
         String result;
         try {
             result = future.get();
@@ -430,7 +442,8 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
         if (logDir.list().length + 1 > MAX_LOG_FILES) {
             assertLogLimit();
         }
-        String dateString = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date());
+        String dateString = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss")
+                .format(new Date());
         String fileName = String.format("maven.%s.log", dateString);
         File logFile = new File(logDir, fileName);
         logFile.createNewFile();
@@ -442,7 +455,8 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
         Arrays.sort(logFiles, new Comparator<File>() {
             @Override
             public int compare(File f1, File f2) {
-                return Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
+                return Long.valueOf(f1.lastModified()).compareTo(
+                        f2.lastModified());
             }
         });
         return logFiles[0].delete();
@@ -457,8 +471,8 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
             this.mvnVersion = tmpMvnVersion;
             throw new RuntimeException(e);
         }
-        mvnCommand = System.getProperty("karaf.data") + "/apache-maven-" + mvnVersion
-                + "/bin/mvn" + addSystemEnding();
+        mvnCommand = System.getProperty("karaf.data") + "/apache-maven-"
+                + mvnVersion + "/bin/mvn" + addSystemEnding();
     }
 
     public void setBuildEvents(BuildDomainEvents buildEvents) {
