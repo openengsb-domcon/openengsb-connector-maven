@@ -495,7 +495,23 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
         this.contextService = contextService;
     }
 
-    public void setSynchronous(boolean synchronous) {
+    protected BuildDomainEvents getBuildEvents() {
+		return buildEvents;
+	}
+
+	protected TestDomainEvents getTestEvents() {
+		return testEvents;
+	}
+
+	protected DeployDomainEvents getDeployEvents() {
+		return deployEvents;
+	}
+
+	protected ContextCurrentService getContextService() {
+		return contextService;
+	}
+
+	public void setSynchronous(boolean synchronous) {
         this.synchronous = synchronous;
     }
 
