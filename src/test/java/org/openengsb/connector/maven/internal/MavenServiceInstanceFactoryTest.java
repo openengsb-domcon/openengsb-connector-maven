@@ -33,21 +33,57 @@ import org.openengsb.domain.test.TestDomainEvents;
 
 public class MavenServiceInstanceFactoryTest {
 
-    @Test
-    public void testCreatePlaintextReportService() throws Exception {
-        System.setProperty("karaf.data", FileUtils.getTempDirectoryPath());
-        MavenServiceInstanceFactory factory = new MavenServiceInstanceFactory();
-        factory.setBuildEvents(mock(BuildDomainEvents.class));
-        factory.setTestEvents(mock(TestDomainEvents.class));
-        factory.setDeployEvents(mock(DeployDomainEvents.class));
-        factory.setContextService(mock(ContextCurrentService.class));
+	@Test
+	public void testCreateSeviceImplInjects() throws Exception {
+		BuildDomainEvents build = mock(BuildDomainEvents.class);
+		TestDomainEvents test = mock(TestDomainEvents.class);
+		DeployDomainEvents deploy = mock(DeployDomainEvents.class);
+		ContextCurrentService context = mock(ContextCurrentService.class);
 
-        Map<String, String> attributes = new HashMap<String, String>();
-        attributes.put("projectPath", "someValue");
-        
-        MavenServiceImpl mavenService = (MavenServiceImpl) factory.createNewInstance("id");
-        factory.applyAttributes(mavenService, attributes);
+		MavenServiceInstanceFactory factory = createFactory(build, test,
+				deploy, context);
 
-        Assert.assertNotNull(mavenService);
-    }
+		MavenServiceImpl mavenService = (MavenServiceImpl) factory
+				.createNewInstance("id");
+
+		Assert.assertEquals(build, mavenService.getBuildEvents());
+		Assert.assertEquals(test, mavenService.getTestEvents());
+		Assert.assertEquals(deploy, mavenService.getDeployEvents());
+		Assert.assertEquals(context, mavenService.getContextService());
+
+	}
+
+	@Test
+	public void testCreatePlaintextReportService() throws Exception {
+		System.setProperty("karaf.data", FileUtils.getTempDirectoryPath());
+
+		MavenServiceInstanceFactory factory = createFactory(
+				mock(BuildDomainEvents.class),
+				mock(TestDomainEvents.class),
+				mock(DeployDomainEvents.class),
+				mock(ContextCurrentService.class));
+
+		Map<String, String> attributes = new HashMap<String, String>();
+		attributes.put("projectPath", "someValue");
+
+		MavenServiceImpl mavenService = (MavenServiceImpl) factory
+				.createNewInstance("id");
+		factory.applyAttributes(mavenService, attributes);
+
+		Assert.assertNotNull(mavenService);
+	}
+
+	private static MavenServiceInstanceFactory createFactory(
+			BuildDomainEvents build, TestDomainEvents test,
+			DeployDomainEvents deploy, ContextCurrentService context) {
+		
+		MavenServiceInstanceFactory factory = new MavenServiceInstanceFactory();
+		factory.setBuildEvents(build);
+		factory.setTestEvents(test);
+		factory.setDeployEvents(deploy);
+		factory.setContextService(context);
+
+		return factory;
+	}
+
 }

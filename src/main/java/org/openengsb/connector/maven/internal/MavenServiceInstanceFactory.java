@@ -43,7 +43,7 @@ public class MavenServiceInstanceFactory extends AbstractConnectorInstanceFactor
         service.setTestEvents(testEvents);
         service.setDeployEvents(deployEvents);
         service.setContextService(contextService);
-        return new MavenServiceImpl(id);
+        return service;
     }
 
     @Override
