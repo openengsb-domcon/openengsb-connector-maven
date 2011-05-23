@@ -1,3 +1,22 @@
+openengsb-connector-maven-1.2.2 2011-05-23
+---------------------------------------------------------------------
+
+This release contains an upgrade of all domains (build, deploy, test) and the openengsb-framework. In addition the ServiceInstance Factory does inject properties correctly now.
+
+
+** Bug
+    * [OPENENGSB-1598] - ServiceInstance factory does not inject properties
+
+** Library Upgrade
+    * [OPENENGSB-1492] - Upgrade openengsb-domain-build to 1.2.1
+    * [OPENENGSB-1494] - Upgrade openengsb-domain-deploy to 1.2.1
+    * [OPENENGSB-1499] - Upgrade openengsb-domain-test to 1.2.1
+    * [OPENENGSB-1609] - Upgrade openengsb-framework to 1.3.0.M2
+
+** Task
+    * [OPENENGSB-1576] - Release openengsb-connector-maven-1.2.2
+
+
 openengsb-connector-maven-1.2.1 2011-05-16
 ---------------------------------------------------------------------
 
