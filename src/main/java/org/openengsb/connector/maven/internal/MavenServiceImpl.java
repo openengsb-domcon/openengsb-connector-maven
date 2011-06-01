@@ -116,7 +116,7 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
         Properties prop = new Properties();
         List<String> mirrorList = new ArrayList<String>();
 
-        prop.load(ClassLoader.getSystemResourceAsStream("config.properties"));
+        prop.load(this.getClass().getClassLoader().getResourceAsStream("config.properties"));
 
         int i = 1;
         while (prop.getProperty("mirror" + i) != null) {
