@@ -1,7 +1,21 @@
+openengsb-connector-maven-1.2.3 2011-06-19
+---------------------------------------------------------------------
+
+This release contains an upgrade to the versions attributes in the UI and an classloader issue.
+
+** Bug
+    * [OPENENGSB-1666] - The maven connector's version attribute has no name
+    * [OPENENGSB-1667] - The maven connector cannot find the filter list
+
+** Task
+    * [OPENENGSB-1642] - Release openengsb-connector-maven-1.2.3
+
+
 openengsb-connector-maven-1.2.2 2011-05-23
 ---------------------------------------------------------------------
 
-This release contains an upgrade of all domains (build, deploy, test) and the openengsb-framework. In addition the ServiceInstance Factory does inject properties correctly now.
+This release contains an upgrade of all domains (build, deploy, test) and the openengsb-framework. In addition the 
+ServiceInstance Factory does inject properties correctly now.
 
 
 ** Bug
