@@ -44,7 +44,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.openengsb.core.api.AliveState;
 import org.openengsb.core.api.context.ContextCurrentService;
-import org.openengsb.core.common.AbstractOpenEngSBService;
+import org.openengsb.core.common.AbstractOpenEngSBConnectorService;
 import org.openengsb.domain.build.BuildDomain;
 import org.openengsb.domain.build.BuildDomainEvents;
 import org.openengsb.domain.build.BuildFailEvent;
@@ -63,7 +63,7 @@ import org.openengsb.domain.test.TestSuccessEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildDomain, TestDomain, DeployDomain {
+public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implements BuildDomain, TestDomain, DeployDomain {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MavenServiceImpl.class);
 
