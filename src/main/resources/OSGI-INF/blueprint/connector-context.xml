@@ -40,6 +40,7 @@
       <property name="testEvents" ref="testEvents" />
       <property name="deployEvents" ref="deployEvents" />
       <property name="contextService" ref="contextService" />
+      <property name="ekbService" ref="ekbService" />
     </bean>
   </service>
 
@@ -67,5 +68,6 @@
   <reference id="testEvents" interface="org.openengsb.domain.test.TestDomainEvents" />
   <reference id="deployEvents" interface="org.openengsb.domain.deploy.DeployDomainEvents" />
   <reference id="contextService" interface="org.openengsb.core.api.context.ContextCurrentService" />
+  <reference id="ekbService" interface="org.openengsb.core.api.ekb.EngineeringKnowledgeBaseService" />
 
 </blueprint>
