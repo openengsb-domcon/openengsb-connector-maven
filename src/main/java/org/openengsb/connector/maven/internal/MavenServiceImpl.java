@@ -478,6 +478,7 @@ public class MavenServiceImpl extends AbstractOpenEngSBService implements BuildD
         }
         mvnCommand = System.getProperty("karaf.data") + "/apache-maven-"
                 + mvnVersion + "/bin/mvn" + addSystemEnding();
+        new File(mvnCommand).setExecutable(true);
     }
 
     public void setBuildEvents(BuildDomainEvents buildEvents) {
