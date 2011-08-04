@@ -1,3 +1,20 @@
+openengsb-connector-maven-1.2.4 2011-08-04
+---------------------------------------------------------------------
+
+This release contains a minor adaption to an upgrade in the openengsb, increases download speed and fixes a bug 
+in using downloaded distributions.
+
+** Bug
+    * [OPENENGSB-1874] - Autoinstalled maven versions are not made executable
+
+** Improvement
+    * [OPENENGSB-1882] - Use maven central to download maven assemblies instead of proxies
+
+** Task
+    * [OPENENGSB-1737] - Release openengsb-connector-maven-1.2.4
+    * [OPENENGSB-1767] - Use ContextHolder instead of ContextCurrentService.{get/set}ThreadLocalContext methods
+
+
 openengsb-connector-maven-1.2.3 2011-06-19
 ---------------------------------------------------------------------
 
