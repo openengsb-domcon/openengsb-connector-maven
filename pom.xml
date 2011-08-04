@@ -41,7 +41,7 @@
 
   <groupId>org.openengsb.connector</groupId>
   <artifactId>openengsb-connector-maven</artifactId>
-  <version>1.2.4-SNAPSHOT</version>
+  <version>1.2.4</version>
 
   <name>OpenEngSB :: Connector :: Maven</name>
 
