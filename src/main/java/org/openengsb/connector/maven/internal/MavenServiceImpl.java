@@ -44,6 +44,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.openengsb.core.api.AliveState;
 import org.openengsb.core.api.context.ContextCurrentService;
+import org.openengsb.core.api.context.ContextHolder;
 import org.openengsb.core.common.AbstractOpenEngSBConnectorService;
 import org.openengsb.domain.build.BuildDomain;
 import org.openengsb.domain.build.BuildDomainEvents;
@@ -220,12 +221,12 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
     @Override
     public String runTests() {
         final String id = createId();
-        final String contextId = contextService.getThreadLocalContext();
+        final String contextId = ContextHolder.get().getCurrentContextId();
         Runnable runTests = new Runnable() {
 
             @Override
             public void run() {
-                contextService.setThreadLocalContext(contextId);
+                ContextHolder.get().setCurrentContextId(contextId);
                 MavenResult result = excuteCommand(command);
                 testEvents.raiseEvent(new TestStartEvent(id));
                 if (result.isSuccess()) {
@@ -243,11 +244,11 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
 
     @Override
     public void runTests(final long processId) {
-        final String contextId = contextService.getThreadLocalContext();
+        final String contextId = ContextHolder.get().getCurrentContextId();
         Runnable runTests = new Runnable() {
             @Override
             public void run() {
-                contextService.setThreadLocalContext(contextId);
+                ContextHolder.get().setCurrentContextId(contextId);
                 MavenResult result = excuteCommand(command);
                 testEvents.raiseEvent(new TestStartEvent(processId));
                 if (result.isSuccess()) {
@@ -265,11 +266,11 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
     @Override
     public String build() {
         final String id = createId();
-        final String contextId = contextService.getThreadLocalContext();
+        final String contextId = ContextHolder.get().getCurrentContextId();
         Runnable doBuild = new Runnable() {
             @Override
             public void run() {
-                contextService.setThreadLocalContext(contextId);
+                ContextHolder.get().setCurrentContextId(contextId);
                 MavenResult result = excuteCommand(command);
                 buildEvents.raiseEvent(new BuildStartEvent(id));
                 if (result.isSuccess()) {
@@ -287,11 +288,11 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
 
     @Override
     public void build(final long processId) {
-        final String contextId = contextService.getThreadLocalContext();
+        final String contextId = ContextHolder.get().getCurrentContextId();
         Runnable doBuild = new Runnable() {
             @Override
             public void run() {
-                contextService.setThreadLocalContext(contextId);
+                ContextHolder.get().setCurrentContextId(contextId);
                 MavenResult result = excuteCommand(command);
                 BuildStartEvent buildStartEvent = new BuildStartEvent();
                 buildStartEvent.setProcessId(processId);
@@ -320,12 +321,12 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
     @Override
     public String deploy() {
         final String id = createId();
-        final String contextId = contextService.getThreadLocalContext();
+        final String contextId = ContextHolder.get().getCurrentContextId();
         Runnable doDeploy = new Runnable() {
 
             @Override
             public void run() {
-                contextService.setThreadLocalContext(contextId);
+                ContextHolder.get().setCurrentContextId(contextId);
                 MavenResult result = excuteCommand(command);
                 deployEvents.raiseEvent(new DeployStartEvent(id));
                 if (result.isSuccess()) {
@@ -343,11 +344,11 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
 
     @Override
     public void deploy(final long processId) {
-        final String contextId = contextService.getThreadLocalContext();
+        final String contextId = ContextHolder.get().getCurrentContextId();
         Runnable doDeploy = new Runnable() {
             @Override
             public void run() {
-                contextService.setThreadLocalContext(contextId);
+                ContextHolder.get().setCurrentContextId(contextId);
                 MavenResult result = excuteCommand(command);
                 deployEvents.raiseEvent(new DeployStartEvent(processId));
                 if (result.isSuccess()) {
