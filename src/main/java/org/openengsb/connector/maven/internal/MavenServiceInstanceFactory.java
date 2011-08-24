@@ -19,8 +19,9 @@ package org.openengsb.connector.maven.internal;
 
 import java.util.Map;
 
-import org.openengsb.core.api.Domain;
+import org.openengsb.core.api.Connector;
 import org.openengsb.core.api.context.ContextCurrentService;
+import org.openengsb.core.api.ekb.EngineeringKnowledgeBaseService;
 import org.openengsb.core.common.AbstractConnectorInstanceFactory;
 import org.openengsb.domain.build.BuildDomainEvents;
 import org.openengsb.domain.deploy.DeployDomainEvents;
@@ -29,15 +30,15 @@ import org.openengsb.domain.test.TestDomainEvents;
 public class MavenServiceInstanceFactory extends AbstractConnectorInstanceFactory<MavenServiceImpl> {
 
     private BuildDomainEvents buildEvents;
-
     private TestDomainEvents testEvents;
-
     private DeployDomainEvents deployEvents;
 
     private ContextCurrentService contextService;
+    @SuppressWarnings("unused")
+    private EngineeringKnowledgeBaseService ekbService;
 
     @Override
-    public Domain createNewInstance(String id) {
+    public Connector createNewInstance(String id) {
         MavenServiceImpl service = new MavenServiceImpl(id);
         service.setBuildEvents(buildEvents);
         service.setTestEvents(testEvents);
@@ -74,5 +75,9 @@ public class MavenServiceInstanceFactory extends AbstractConnectorInstanceFactor
 
     public void setContextService(ContextCurrentService contextService) {
         this.contextService = contextService;
+    }
+    
+    public void setEkbService(EngineeringKnowledgeBaseService ekbService) {
+        this.ekbService = ekbService;
     }
 }

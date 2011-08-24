@@ -25,23 +25,23 @@
   <parent>
     <groupId>org.openengsb.connector</groupId>
     <artifactId>openengsb-connector-parent</artifactId>
-    <version>1.3.0.M2</version>
+    <version>1.3.0-SNAPSHOT</version>
   </parent>
 
   <properties>
     <bundle.symbolicName>org.openengsb.connector.maven</bundle.symbolicName>
     <bundle.namespace>org.openengsb.connector.maven</bundle.namespace>
-    <openengsb.domain.deploy.version>1.2.1</openengsb.domain.deploy.version>
-    <openengsb.domain.deploy.range>[1.2,1.3)</openengsb.domain.deploy.range>
-    <openengsb.domain.build.version>1.2.1</openengsb.domain.build.version>
-    <openengsb.domain.build.range>[1.2,1.3)</openengsb.domain.build.range>
-    <openengsb.domain.test.version>1.2.1</openengsb.domain.test.version>
-    <openengsb.domain.test.range>[1.2,1.3)</openengsb.domain.test.range>
+    <openengsb.domain.deploy.version>2.0.0-SNAPSHOT</openengsb.domain.deploy.version>
+    <openengsb.domain.deploy.range>[2.0,2.1)</openengsb.domain.deploy.range>
+    <openengsb.domain.build.version>2.0.0-SNAPSHOT</openengsb.domain.build.version>
+    <openengsb.domain.build.range>[2.0,2.1)</openengsb.domain.build.range>
+    <openengsb.domain.test.version>2.0.0-SNAPSHOT</openengsb.domain.test.version>
+    <openengsb.domain.test.range>[2.0,2.1)</openengsb.domain.test.range>
   </properties>
 
   <groupId>org.openengsb.connector</groupId>
   <artifactId>openengsb-connector-maven</artifactId>
-  <version>1.2.5-SNAPSHOT</version>
+  <version>2.0.0-SNAPSHOT</version>
 
   <name>OpenEngSB :: Connector :: Maven</name>
 
@@ -106,7 +106,7 @@
               ${openengsb.imports},
               org.openengsb.domain.test.*;version="${openengsb.domain.test.range}",
               org.openengsb.domain.build.*;version="${openengsb.domain.build.range}",
-              org.openengsb.domain.deply.*;version="${openengsb.domain.deploy.range}",
+              org.openengsb.domain.deploy.*;version="${openengsb.domain.deploy.range}",
               *
             </Import-Package>
           </instructions>
