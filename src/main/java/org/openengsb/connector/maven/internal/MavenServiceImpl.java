@@ -29,7 +29,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -113,23 +112,24 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
         }
     }
 
-    private List<String> getListOfMirrors() throws IOException {
-        Properties prop = new Properties();
-        List<String> mirrorList = new ArrayList<String>();
-
-        prop.load(this.getClass().getClassLoader().getResourceAsStream("config.properties"));
-
-        int i = 1;
-        while (prop.getProperty("mirror" + i) != null) {
-            mirrorList.add(prop.getProperty("mirror" + i));
-            i++;
-        }
-
-        return mirrorList;
-    }
-
     public Boolean isMavenInstalled() {
         return new File(System.getProperty("karaf.data"), "apache-maven-" + mvnVersion).exists();
+    }
+
+
+    public void installMaven() throws IOException {
+        File tmp = File.createTempFile("mvn_setup", "zip");
+        initializeDownload(tmp);
+        unzipFile(tmp.getAbsolutePath(), System.getProperty("karaf.data"));
+    }
+
+    private void initializeDownload(File tmp) {
+        String baseUrl = "http://repo1.maven.org/maven2/org/apache/maven/apache-maven";
+        String fullUrl = String.format("%s/%s/apache-maven-%s-bin.zip", baseUrl, mvnVersion, mvnVersion);
+        if (!download(fullUrl, tmp)) {
+            throw new IllegalStateException(
+                String.format("Maven download not possible, because %s does not answer", fullUrl));
+        }
     }
 
     public boolean download(String urlString, File tmp) {
@@ -141,32 +141,6 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
             return false;
         }
         return true;
-    }
-
-    public void installMaven() throws IOException {
-        File tmp = File.createTempFile("mvn_setup", "zip");
-        List<String> mirrors = getListOfMirrors();
-
-        if (mirrors.isEmpty()) {
-            throw new IllegalStateException(
-                    "Maven download not possible, because there are no mirrors specified");
-        } else if (!downloadFromAnyMirror(tmp, mirrors)) {
-            throw new IllegalStateException(
-                    "Maven download not possible, because there are no available mirrors");
-        }
-
-        unzipFile(tmp.getAbsolutePath(), System.getProperty("karaf.data"));
-        new File(mvnCommand).setExecutable(true);
-    }
-
-    private boolean downloadFromAnyMirror(File tmp, List<String> mirrors) {
-        for (String mirrorBaseUrl : mirrors) {
-            String fullUrl = String.format("%sapache-maven-%s-bin.zip", mirrorBaseUrl, mvnVersion);
-            if (download(fullUrl, tmp)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public void unzipFile(String archivePath, String targetPath)
@@ -478,6 +452,7 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
         }
         mvnCommand = System.getProperty("karaf.data") + "/apache-maven-"
                 + mvnVersion + "/bin/mvn" + addSystemEnding();
+        new File(mvnCommand).setExecutable(true);
     }
 
     public void setBuildEvents(BuildDomainEvents buildEvents) {
@@ -497,22 +472,22 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
     }
 
     protected BuildDomainEvents getBuildEvents() {
-		return buildEvents;
-	}
+        return buildEvents;
+    }
 
-	protected TestDomainEvents getTestEvents() {
-		return testEvents;
-	}
+    protected TestDomainEvents getTestEvents() {
+        return testEvents;
+    }
 
-	protected DeployDomainEvents getDeployEvents() {
-		return deployEvents;
-	}
+    protected DeployDomainEvents getDeployEvents() {
+        return deployEvents;
+    }
 
-	protected ContextCurrentService getContextService() {
-		return contextService;
-	}
+    protected ContextCurrentService getContextService() {
+        return contextService;
+    }
 
-	public void setSynchronous(boolean synchronous) {
+    public void setSynchronous(boolean synchronous) {
         this.synchronous = synchronous;
     }
 
