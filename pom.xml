@@ -146,17 +146,17 @@
     <!-- OpenEngSB Domain References -->
     <dependency>
       <groupId>org.openengsb.domain</groupId>
-      <artifactId>openengsb-domain-test</artifactId>
+      <artifactId>org.openengsb.domain.test</artifactId>
       <version>${openengsb.domain.test.version}</version>
     </dependency>
     <dependency>
       <groupId>org.openengsb.domain</groupId>
-      <artifactId>openengsb-domain-build</artifactId>
+      <artifactId>org.openengsb.domain.build</artifactId>
       <version>${openengsb.domain.build.version}</version>
     </dependency>
     <dependency>
       <groupId>org.openengsb.domain</groupId>
-      <artifactId>openengsb-domain-deploy</artifactId>
+      <artifactId>org.openengsb.domain.deploy</artifactId>
       <version>${openengsb.domain.deploy.version}</version>
     </dependency>
   </dependencies>
