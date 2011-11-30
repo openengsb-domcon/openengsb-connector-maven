@@ -37,11 +37,11 @@
     <openengsb.domain.build.range>[2.0,2.1)</openengsb.domain.build.range>
     <openengsb.domain.test.version>2.0.0-SNAPSHOT</openengsb.domain.test.version>
     <openengsb.domain.test.range>[2.0,2.1)</openengsb.domain.test.range>
-    <openengsb.framework.version>2.0.3</openengsb.framework.version>
+    <openengsb.framework.version>2.1.2</openengsb.framework.version>
   </properties>
 
   <groupId>org.openengsb.connector</groupId>
-  <artifactId>openengsb-connector-maven</artifactId>
+  <artifactId>org.openengsb.connector.maven</artifactId>
   <version>2.0.0-SNAPSHOT</version>
 
   <name>OpenEngSB :: Connector :: Maven</name>
