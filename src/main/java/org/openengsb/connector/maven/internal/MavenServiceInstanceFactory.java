@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.openengsb.core.api.Connector;
 import org.openengsb.core.api.context.ContextCurrentService;
-import org.openengsb.core.api.ekb.EngineeringKnowledgeBaseService;
 import org.openengsb.core.common.AbstractConnectorInstanceFactory;
 import org.openengsb.domain.build.BuildDomainEvents;
 import org.openengsb.domain.deploy.DeployDomainEvents;
@@ -34,8 +33,6 @@ public class MavenServiceInstanceFactory extends AbstractConnectorInstanceFactor
     private DeployDomainEvents deployEvents;
 
     private ContextCurrentService contextService;
-    @SuppressWarnings("unused")
-    private EngineeringKnowledgeBaseService ekbService;
 
     @Override
     public Connector createNewInstance(String id) {
@@ -75,9 +72,5 @@ public class MavenServiceInstanceFactory extends AbstractConnectorInstanceFactor
 
     public void setContextService(ContextCurrentService contextService) {
         this.contextService = contextService;
-    }
-    
-    public void setEkbService(EngineeringKnowledgeBaseService ekbService) {
-        this.ekbService = ekbService;
     }
 }
