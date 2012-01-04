@@ -26,11 +26,7 @@
   http://www.w3.org/2001/XMLSchema-instance http://www.w3.org/2001/XMLSchema-instance.xsd">
 
   <title>Maven Connector</title>
-  <para>TBW</para>
-  <section>
-    <title>Description</title>
-    <para>TBW</para>
-  </section>
+  <para>${project.description}</para>
   <section>
     <title>Configuration</title>
     <para>TBW</para>
