@@ -54,6 +54,8 @@
   </description>
 
   <url>http://www.openengsb.org</url>
+  
+  <inceptionYear>2009</inceptionYear>
 
   <licenses>
     <license>
@@ -68,6 +70,16 @@
     <developerConnection>scm:git:git@github.com:openengsb/openengsb-connector-maven.git</developerConnection>
     <url>http://github.com/openengsb/openengsb-connector-maven</url>
   </scm>
+  
+  <issueManagement>
+    <system>JIRA</system>
+    <url>http://issues.openengsb.org/jira/browse/OPENENGSB</url>
+  </issueManagement>
+
+  <ciManagement>
+    <system>OpenCIT</system>
+    <url>http://build.openengsb.org/opencit/</url>
+  </ciManagement>
 
   <build>
     <plugins>
