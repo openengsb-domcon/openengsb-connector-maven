@@ -37,7 +37,7 @@
     <openengsb.domain.build.range>[2.0,3.0)</openengsb.domain.build.range>
     <openengsb.domain.test.version>2.0.0</openengsb.domain.test.version>
     <openengsb.domain.test.range>[2.0,3.0)</openengsb.domain.test.range>
-    <openengsb.framework.version>2.1.2</openengsb.framework.version>
+    <openengsb.framework.version>2.5.0-SNAPSHOT</openengsb.framework.version>
   </properties>
 
   <groupId>org.openengsb.connector</groupId>
