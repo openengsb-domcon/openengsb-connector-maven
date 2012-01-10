@@ -46,9 +46,6 @@ public class MavenServiceInstanceFactory extends AbstractConnectorInstanceFactor
 
     @Override
     public void doApplyAttributes(MavenServiceImpl instance, Map<String, String> attributes) {
-        if (attributes.containsKey("projectPath")) {
-            instance.setProjectPath(attributes.get("projectPath"));
-        }
         if (attributes.containsKey("command")) {
             instance.setCommand(attributes.get("command"));
         }
