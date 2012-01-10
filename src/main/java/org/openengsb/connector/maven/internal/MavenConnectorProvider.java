@@ -28,13 +28,11 @@ public class MavenConnectorProvider extends AbstractConnectorProvider {
         Builder builder = ServiceDescriptor.builder(strings);
         builder.id(this.id);
         builder.name("service.name").description("service.description");
-        builder.attribute(builder.newAttribute().id("projectPath").name("service.projectPath.name")
-            .description("service.projectPath.description").required().build());
         builder.attribute(builder.newAttribute().id("command").name("service.command.name")
             .description("service.command.description").required().build());
         builder.attribute(builder.newAttribute().id("mvnVersion").name("service.mvnVersion.name")
                 .description("service.mvnVersion.description").build());
-        
+
         return builder.build();
     }
 

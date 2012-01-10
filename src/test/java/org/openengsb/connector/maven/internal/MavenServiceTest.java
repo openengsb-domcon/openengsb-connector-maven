@@ -42,6 +42,8 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openengsb.core.api.AliveState;
 import org.openengsb.core.api.context.ContextCurrentService;
+import org.openengsb.core.api.model.OpenEngSBFileModel;
+import org.openengsb.core.common.util.ModelUtils;
 import org.openengsb.domain.build.BuildDomainEvents;
 import org.openengsb.domain.build.BuildStartEvent;
 import org.openengsb.domain.build.BuildSuccessEvent;
@@ -85,9 +87,8 @@ public class MavenServiceTest {
 
     @Test
     public void build_shouldWork() {
-        mavenService.setProjectPath(getPath("test-unit-success"));
         mavenService.setCommand("clean compile");
-        String id = mavenService.build();
+        String id = mavenService.build(getFileModel("test-unit-success"));
         ArgumentCaptor<BuildSuccessEvent> argumentCaptor = ArgumentCaptor.forClass(BuildSuccessEvent.class);
 
         verify(buildEvents).raiseEvent(any(BuildStartEvent.class));
@@ -99,47 +100,43 @@ public class MavenServiceTest {
 
     @Test
     public void buildWithProcessId_shouldWork() {
-        mavenService.setProjectPath(getPath("test-unit-success"));
+        OpenEngSBFileModel path = getFileModel("test-unit-success");
         mavenService.setCommand("clean compile");
-        mavenService.build(42);
+        mavenService.build(path, 42);
         verify(buildEvents).raiseEvent(any(BuildStartEvent.class));
-        verify(buildEvents).raiseEvent(refEq(new BuildSuccessEvent(42L, null), "output"));
+        verify(buildEvents).raiseEvent(refEq(new BuildSuccessEvent(42L, null, path), "output"));
     }
 
     @Test
     public void test_shouldWork() {
-        mavenService.setProjectPath(getPath("test-unit-success"));
         mavenService.setCommand("test");
-        String id = mavenService.runTests();
+        mavenService.runTests(getFileModel("test-unit-success"));
         verify(testEvents).raiseTestStartEvent(any(TestStartEvent.class));
-        verify(testEvents).raiseTestSuccessEvent(refEq(new TestSuccessEvent(id, null), "output"));
+        verify(testEvents).raiseTestSuccessEvent(any(TestSuccessEvent.class));
     }
 
     @Test
     public void testWithProcessId_shouldThrowEventsWithProcessId() {
-        mavenService.setProjectPath(getPath("test-unit-success"));
         mavenService.setCommand("install");
         long processId = 42;
-        mavenService.runTestsProcessId(processId);
+        mavenService.runTestsProcessId(getFileModel("test-unit-success"), processId);
         verify(testEvents).raiseTestStartEvent(any(TestStartEvent.class));
-        verify(testEvents).raiseTestSuccessEvent(refEq(new TestSuccessEvent(processId, null), "output"));
+        verify(testEvents).raiseTestSuccessEvent(any(TestSuccessEvent.class));
     }
 
     @Test
     public void deploy_shoudWork() {
-        mavenService.setProjectPath(getPath("test-unit-success"));
         mavenService.setCommand("install -Dmaven.test.skip=true");
-        String id = mavenService.deploy();
+        String id = mavenService.deploy(getFileModel("test-unit-success"));
         verify(deployEvents).raiseEvent(any(DeployStartEvent.class));
         verify(deployEvents).raiseEvent(refEq(new DeploySuccessEvent(id, null), "output"));
     }
 
     @Test
     public void deployWithProcessId_shouldThrowEventsWithProcessId() {
-        mavenService.setProjectPath(getPath("test-unit-success"));
         mavenService.setCommand("install -Dmaven.test.skip=true");
         long id = 42;
-        mavenService.deploy(id);
+        mavenService.deploy(getFileModel("test-unit-success"), id);
         verify(deployEvents).raiseEvent(any(DeployStartEvent.class));
         verify(deployEvents).raiseEvent(refEq(new DeploySuccessEvent(id, null), "output"));
     }
@@ -147,31 +144,22 @@ public class MavenServiceTest {
     @Ignore("no idea why this fails, it works from cmd-line")
     @Test
     public void testTestFail() {
-        mavenService.setProjectPath(getPath("test-unit-fail"));
         mavenService.setCommand("install");
-        String id = mavenService.runTests();
+        String id = mavenService.runTests(getFileModel("test-unit-fail"));
         verify(testEvents).raiseTestStartEvent(any(TestStartEvent.class));
         verify(testEvents).raiseTestFailEvent(refEq(new TestFailEvent(id, null), "output"));
     }
 
     @Test
     public void testGetAliveState_shouldReturnOnline() {
-        mavenService.setProjectPath(getPath("test-unit-success"));
         assertThat(mavenService.getAliveState(), is(AliveState.ONLINE));
-    }
-
-    @Test
-    public void testGetAliveStateWrongPath_shouldReturnOffline() {
-        mavenService.setProjectPath("pathThatDoesForSureNotExistBecauseItIsStrange");
-        assertThat(mavenService.getAliveState(), is(AliveState.OFFLINE));
     }
 
     @Test
     public void build_shouldWriteLogFile() throws Exception {
         mavenService.setUseLogFile(true);
-        mavenService.setProjectPath(getPath("test-unit-success"));
         mavenService.setCommand("clean compile");
-        mavenService.build();
+        mavenService.build(getFileModel("test-unit-success"));
         ArgumentCaptor<BuildSuccessEvent> argumentCaptor = ArgumentCaptor.forClass(BuildSuccessEvent.class);
 
         verify(buildEvents).raiseEvent(argumentCaptor.capture());
@@ -188,7 +176,6 @@ public class MavenServiceTest {
     public void asyncBuild_shouldRaiseBuildSuccessEvent() throws Exception {
         final Object sync = new Object();
         mavenService.setSynchronous(false);
-        mavenService.setProjectPath(getPath("test-unit-success"));
         mavenService.setCommand("clean compile");
         ArgumentCaptor<BuildSuccessEvent> eventCaptor = ArgumentCaptor.forClass(BuildSuccessEvent.class);
         doAnswer(new Answer<Void>() {
@@ -201,7 +188,7 @@ public class MavenServiceTest {
             }
         }).when(buildEvents).raiseEvent(eventCaptor.capture());
         Thread waitForBuildEnd = startWaiterThread(sync);
-        mavenService.build();
+        mavenService.build(getFileModel("test-unit-success"));
         waitForBuildEnd.join();
         BuildSuccessEvent event = eventCaptor.getValue();
         assertThat(event.getOutput(), containsString("SUCCESS"));
@@ -213,13 +200,12 @@ public class MavenServiceTest {
         final Object syncStart = new Object();
         mavenService.setUseLogFile(true);
         mavenService.setSynchronous(false);
-        mavenService.setProjectPath(getPath("test-unit-success"));
         mavenService.setCommand("clean compile");
         makeNotifyAnswerForBuildStart(syncStart);
         makeNotifyAnswerForBuildSuccess(syncFinish);
         Thread waitForBuildStart = startWaiterThread(syncStart);
         Thread waitForBuildEnd = startWaiterThread(syncFinish);
-        mavenService.build();
+        mavenService.build(getFileModel("test-unit-success"));
         waitForBuildStart.join();
         Collection<File> listFiles = FileUtils.listFiles(new File("log"), FileFilterUtils.fileFileFilter(), null);
         assertThat("no logfile was created", listFiles.isEmpty(), is(false));
@@ -243,9 +229,8 @@ public class MavenServiceTest {
 
         mavenService.setUseLogFile(true);
         mavenService.setSynchronous(false);
-        mavenService.setProjectPath(getPath("test-unit-success"));
         mavenService.setCommand("clean compile");
-        mavenService.build();
+        mavenService.build(getFileModel("test-unit-success"));
         makeNotifyAnswerForBuildSuccess(syncFinish);
         Thread waitForBuildEnd = startWaiterThread(syncFinish);
 
@@ -298,6 +283,12 @@ public class MavenServiceTest {
 
     private String getPath(String folder) {
         return ClassLoader.getSystemResource(folder).getFile();
+    }
+
+    private OpenEngSBFileModel getFileModel(String folder) {
+        OpenEngSBFileModel m = ModelUtils.createEmptyModelObject(OpenEngSBFileModel.class);
+        m.setFile(new File(getPath(folder)));
+        return m;
     }
 
 }

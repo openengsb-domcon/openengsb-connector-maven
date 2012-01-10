@@ -44,7 +44,9 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.openengsb.core.api.AliveState;
 import org.openengsb.core.api.context.ContextCurrentService;
 import org.openengsb.core.api.context.ContextHolder;
+import org.openengsb.core.api.model.OpenEngSBFileModel;
 import org.openengsb.core.common.AbstractOpenEngSBConnectorService;
+import org.openengsb.core.common.util.ModelUtils;
 import org.openengsb.domain.build.BuildDomain;
 import org.openengsb.domain.build.BuildDomainEvents;
 import org.openengsb.domain.build.BuildFailEvent;
@@ -71,7 +73,6 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
 
     private String mvnVersion = "";
     private String mvnCommand;
-    private String projectPath;
 
     private BuildDomainEvents buildEvents;
     private TestDomainEvents testEvents;
@@ -175,25 +176,13 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
         return "";
     }
 
-    void setProjectPath(String projectPath) {
-        if (new File(projectPath).isAbsolute()) {
-            this.projectPath = projectPath.replaceAll("%20", " ");
-        } else {
-            this.projectPath = System.getProperty("karaf.data") + "/" + projectPath.replaceAll("%20", " ");
-        }
-    }
-
     @Override
     public AliveState getAliveState() {
-        if (validate()) {
-            return AliveState.ONLINE;
-        } else {
-            return AliveState.OFFLINE;
-        }
+        return AliveState.ONLINE;
     }
 
     @Override
-    public String runTests() {
+    public String runTests(final OpenEngSBFileModel path) {
         final String id = createId();
         final String contextId = ContextHolder.get().getCurrentContextId();
         Runnable runTests = new Runnable() {
@@ -201,11 +190,13 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
             @Override
             public void run() {
                 ContextHolder.get().setCurrentContextId(contextId);
-                MavenResult result = excuteCommand(command);
+                MavenResult result = excuteCommand(command, path.getFile());
                 testEvents.raiseTestStartEvent(new TestStartEvent(id));
                 if (result.isSuccess()) {
+                    OpenEngSBFileModel outPath = ModelUtils.createEmptyModelObject(OpenEngSBFileModel.class);
+                    outPath.setFile(path.getFile());
                     testEvents.raiseTestSuccessEvent(new TestSuccessEvent(id, result
-                            .getOutput()));
+                            .getOutput(), outPath));
                 } else {
                     testEvents.raiseTestFailEvent(new TestFailEvent(id, result
                             .getOutput()));
@@ -217,17 +208,19 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
     }
 
     @Override
-    public void runTestsProcessId(final long processId) {
+    public void runTestsProcessId(final OpenEngSBFileModel path, final long processId) {
         final String contextId = ContextHolder.get().getCurrentContextId();
         Runnable runTests = new Runnable() {
             @Override
             public void run() {
                 ContextHolder.get().setCurrentContextId(contextId);
-                MavenResult result = excuteCommand(command);
+                MavenResult result = excuteCommand(command, path.getFile());
                 testEvents.raiseTestStartEvent(new TestStartEvent(processId));
                 if (result.isSuccess()) {
+                    OpenEngSBFileModel outPath = ModelUtils.createEmptyModelObject(OpenEngSBFileModel.class);
+                    outPath.setFile(path.getFile());
                     testEvents.raiseTestSuccessEvent(new TestSuccessEvent(processId,
-                            result.getOutput()));
+                            result.getOutput(), outPath));
                 } else {
                     testEvents.raiseTestFailEvent(new TestFailEvent(processId, result
                             .getOutput()));
@@ -238,18 +231,20 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
     }
 
     @Override
-    public String build() {
+    public String build(final OpenEngSBFileModel path) {
         final String id = createId();
         final String contextId = ContextHolder.get().getCurrentContextId();
         Runnable doBuild = new Runnable() {
             @Override
             public void run() {
                 ContextHolder.get().setCurrentContextId(contextId);
-                MavenResult result = excuteCommand(command);
+                MavenResult result = excuteCommand(command, path.getFile());
                 buildEvents.raiseEvent(new BuildStartEvent(id));
                 if (result.isSuccess()) {
+                    OpenEngSBFileModel outPath = ModelUtils.createEmptyModelObject(OpenEngSBFileModel.class);
+                    outPath.setFile(path.getFile());
                     buildEvents.raiseEvent(new BuildSuccessEvent(id, result
-                            .getOutput()));
+                            .getOutput(), outPath));
                 } else {
                     buildEvents.raiseEvent(new BuildFailEvent(id, result
                             .getOutput()));
@@ -261,19 +256,21 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
     }
 
     @Override
-    public void build(final long processId) {
+    public void build(final OpenEngSBFileModel path, final long processId) {
         final String contextId = ContextHolder.get().getCurrentContextId();
         Runnable doBuild = new Runnable() {
             @Override
             public void run() {
                 ContextHolder.get().setCurrentContextId(contextId);
-                MavenResult result = excuteCommand(command);
+                MavenResult result = excuteCommand(command, path.getFile());
                 BuildStartEvent buildStartEvent = new BuildStartEvent();
                 buildStartEvent.setProcessId(processId);
                 buildEvents.raiseEvent(buildStartEvent);
                 if (result.isSuccess()) {
+                    OpenEngSBFileModel outPath = ModelUtils.createEmptyModelObject(OpenEngSBFileModel.class);
+                    outPath.setFile(path.getFile());
                     buildEvents.raiseEvent(new BuildSuccessEvent(processId,
-                            result.getOutput()));
+                            result.getOutput(), outPath));
                 } else {
                     buildEvents.raiseEvent(new BuildFailEvent(processId, result
                             .getOutput()));
@@ -293,7 +290,7 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
     }
 
     @Override
-    public String deploy() {
+    public String deploy(final OpenEngSBFileModel path) {
         final String id = createId();
         final String contextId = ContextHolder.get().getCurrentContextId();
         Runnable doDeploy = new Runnable() {
@@ -301,7 +298,7 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
             @Override
             public void run() {
                 ContextHolder.get().setCurrentContextId(contextId);
-                MavenResult result = excuteCommand(command);
+                MavenResult result = excuteCommand(command, path.getFile());
                 deployEvents.raiseEvent(new DeployStartEvent(id));
                 if (result.isSuccess()) {
                     deployEvents.raiseEvent(new DeploySuccessEvent(id, result
@@ -317,13 +314,13 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
     }
 
     @Override
-    public void deploy(final long processId) {
+    public void deploy(final OpenEngSBFileModel path, final long processId) {
         final String contextId = ContextHolder.get().getCurrentContextId();
         Runnable doDeploy = new Runnable() {
             @Override
             public void run() {
                 ContextHolder.get().setCurrentContextId(contextId);
-                MavenResult result = excuteCommand(command);
+                MavenResult result = excuteCommand(command, path.getFile());
                 deployEvents.raiseEvent(new DeployStartEvent(processId));
                 if (result.isSuccess()) {
                     deployEvents.raiseEvent(new DeploySuccessEvent(processId,
@@ -342,13 +339,7 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
         return UUID.randomUUID().toString();
     }
 
-    public Boolean validate() {
-        return excuteCommand("validate").isSuccess();
-    }
-
-    private synchronized MavenResult excuteCommand(String goal) {
-        File dir = new File(projectPath);
-
+    private synchronized MavenResult excuteCommand(String goal, File dir) {
         List<String> command = new ArrayList<String>();
         command.add(mvnCommand);
         command.addAll(Arrays.asList(goal.trim().split(" ")));
