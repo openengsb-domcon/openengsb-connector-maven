@@ -35,8 +35,8 @@
     <openengsb.domain.deploy.range>[2.0,3.0)</openengsb.domain.deploy.range>
     <openengsb.domain.build.version>2.0.0</openengsb.domain.build.version>
     <openengsb.domain.build.range>[2.0,3.0)</openengsb.domain.build.range>
-    <openengsb.domain.test.version>2.0.0-SNAPSHOT</openengsb.domain.test.version>
-    <openengsb.domain.test.range>[2.0,2.1)</openengsb.domain.test.range>
+    <openengsb.domain.test.version>2.0.0</openengsb.domain.test.version>
+    <openengsb.domain.test.range>[2.0,3.0)</openengsb.domain.test.range>
     <openengsb.framework.version>2.1.2</openengsb.framework.version>
   </properties>
 
