@@ -31,8 +31,8 @@
   <properties>
     <bundle.symbolicName>org.openengsb.connector.maven</bundle.symbolicName>
     <bundle.namespace>org.openengsb.connector.maven</bundle.namespace>
-    <openengsb.domain.deploy.version>2.0.0-SNAPSHOT</openengsb.domain.deploy.version>
-    <openengsb.domain.deploy.range>[2.0,2.1)</openengsb.domain.deploy.range>
+    <openengsb.domain.deploy.version>2.0.0</openengsb.domain.deploy.version>
+    <openengsb.domain.deploy.range>[2.0,3.0)</openengsb.domain.deploy.range>
     <openengsb.domain.build.version>2.0.0</openengsb.domain.build.version>
     <openengsb.domain.build.range>[2.0,3.0)</openengsb.domain.build.range>
     <openengsb.domain.test.version>2.0.0-SNAPSHOT</openengsb.domain.test.version>
