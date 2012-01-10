@@ -1,3 +1,31 @@
+openengsb-connector-maven-2.0.0 2012-01-10
+---------------------------------------------------------------------
+
+In this release all all interfaces and implementations have been adapted to the latest 
+domain/openengsb versions. In addition EDB/EKB access has been implemented.
+
+** Bug
+    * [OPENENGSB-2322] - adapt maven connector to current openengsb-framework
+    * [OPENENGSB-2582] - Domains and Connectors need to include our snapshot repo to work with deployed snapshots correctly
+    * [OPENENGSB-2647] - domain.version.range does not follow semantic versioning
+
+** Improvement
+    * [OPENENGSB-1807] - Enhance maven connector with EDB/EKB access
+    * [OPENENGSB-2577] - add short description to connector-manual
+    * [OPENENGSB-2586] - Include issuetracker, buildserver and inceptionYear from root
+
+** Library Upgrade
+    * [OPENENGSB-2640] - upgrade domain-build to 2.0.0
+    * [OPENENGSB-2642] - upgrade domain-deploy to 2.0.0
+    * [OPENENGSB-2646] - upgrade domain-test to 2.0.0
+
+** Task
+    * [OPENENGSB-2567] - move connector documentation to corresponding connector-repositories
+    * [OPENENGSB-2656] - Release connector-maven-2.0.0
+    * [OPENENGSB-2660] - Rename CHANGELOG.md to CHANGELOG
+    * [OPENENGSB-2661] - use openengsb-connector-parent-2.4.0
+
+
 openengsb-connector-maven-1.2.4 2011-08-04
 ---------------------------------------------------------------------
 
