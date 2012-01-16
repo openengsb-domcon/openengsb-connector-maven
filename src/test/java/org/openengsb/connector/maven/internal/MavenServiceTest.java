@@ -104,24 +104,26 @@ public class MavenServiceTest {
         mavenService.setCommand("clean compile");
         mavenService.build(path, 42);
         verify(buildEvents).raiseEvent(any(BuildStartEvent.class));
-        verify(buildEvents).raiseEvent(refEq(new BuildSuccessEvent(42L, null, path), "output"));
+        verify(buildEvents).raiseEvent(any(BuildSuccessEvent.class));
     }
 
     @Test
     public void test_shouldWork() {
         mavenService.setCommand("test");
-        String id = mavenService.runTests(getFileModel("test-unit-success"));
+        OpenEngSBFileModel path = getFileModel("test-unit-success");
+        mavenService.runTests(path);
         verify(testEvents).raiseEvent(any(TestStartEvent.class));
-        verify(testEvents).raiseEvent(refEq(new TestSuccessEvent(id, null), "output"));
+        verify(testEvents).raiseEvent(any(TestSuccessEvent.class));
     }
 
     @Test
     public void testWithProcessId_shouldThrowEventsWithProcessId() {
         mavenService.setCommand("install");
         long processId = 42;
-        mavenService.runTests(getFileModel("test-unit-success"), processId);
+        OpenEngSBFileModel path = getFileModel("test-unit-success");
+        mavenService.runTests(path, processId);
         verify(testEvents).raiseEvent(any(TestStartEvent.class));
-        verify(testEvents).raiseEvent(refEq(new TestSuccessEvent(processId, null), "output"));
+        verify(testEvents).raiseEvent(any(TestSuccessEvent.class));
     }
 
     @Test
