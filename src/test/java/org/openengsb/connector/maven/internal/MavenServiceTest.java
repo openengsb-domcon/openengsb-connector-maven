@@ -111,8 +111,8 @@ public class MavenServiceTest {
         mavenService.setProjectPath(getPath("test-unit-success"));
         mavenService.setCommand("test");
         String id = mavenService.runTests();
-        verify(testEvents).raiseEvent(any(TestStartEvent.class));
-        verify(testEvents).raiseEvent(refEq(new TestSuccessEvent(id, null), "output"));
+        verify(testEvents).raiseTestStartEvent(any(TestStartEvent.class));
+        verify(testEvents).raiseTestSuccessEvent(refEq(new TestSuccessEvent(id, null), "output"));
     }
 
     @Test
@@ -120,9 +120,9 @@ public class MavenServiceTest {
         mavenService.setProjectPath(getPath("test-unit-success"));
         mavenService.setCommand("install");
         long processId = 42;
-        mavenService.runTests(processId);
-        verify(testEvents).raiseEvent(any(TestStartEvent.class));
-        verify(testEvents).raiseEvent(refEq(new TestSuccessEvent(processId, null), "output"));
+        mavenService.runTestsProcessId(processId);
+        verify(testEvents).raiseTestStartEvent(any(TestStartEvent.class));
+        verify(testEvents).raiseTestSuccessEvent(refEq(new TestSuccessEvent(processId, null), "output"));
     }
 
     @Test
@@ -150,8 +150,8 @@ public class MavenServiceTest {
         mavenService.setProjectPath(getPath("test-unit-fail"));
         mavenService.setCommand("install");
         String id = mavenService.runTests();
-        verify(testEvents).raiseEvent(any(TestStartEvent.class));
-        verify(testEvents).raiseEvent(refEq(new TestFailEvent(id, null), "output"));
+        verify(testEvents).raiseTestStartEvent(any(TestStartEvent.class));
+        verify(testEvents).raiseTestFailEvent(refEq(new TestFailEvent(id, null), "output"));
     }
 
     @Test

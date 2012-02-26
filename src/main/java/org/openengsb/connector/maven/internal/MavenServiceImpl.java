@@ -202,12 +202,12 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
             public void run() {
                 ContextHolder.get().setCurrentContextId(contextId);
                 MavenResult result = excuteCommand(command);
-                testEvents.raiseEvent(new TestStartEvent(id));
+                testEvents.raiseTestStartEvent(new TestStartEvent(id));
                 if (result.isSuccess()) {
-                    testEvents.raiseEvent(new TestSuccessEvent(id, result
+                    testEvents.raiseTestSuccessEvent(new TestSuccessEvent(id, result
                             .getOutput()));
                 } else {
-                    testEvents.raiseEvent(new TestFailEvent(id, result
+                    testEvents.raiseTestFailEvent(new TestFailEvent(id, result
                             .getOutput()));
                 }
             }
@@ -217,19 +217,19 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
     }
 
     @Override
-    public void runTests(final long processId) {
+    public void runTestsProcessId(final long processId) {
         final String contextId = ContextHolder.get().getCurrentContextId();
         Runnable runTests = new Runnable() {
             @Override
             public void run() {
                 ContextHolder.get().setCurrentContextId(contextId);
                 MavenResult result = excuteCommand(command);
-                testEvents.raiseEvent(new TestStartEvent(processId));
+                testEvents.raiseTestStartEvent(new TestStartEvent(processId));
                 if (result.isSuccess()) {
-                    testEvents.raiseEvent(new TestSuccessEvent(processId,
+                    testEvents.raiseTestSuccessEvent(new TestSuccessEvent(processId,
                             result.getOutput()));
                 } else {
-                    testEvents.raiseEvent(new TestFailEvent(processId, result
+                    testEvents.raiseTestFailEvent(new TestFailEvent(processId, result
                             .getOutput()));
                 }
             }
