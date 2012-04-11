@@ -289,6 +289,32 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
         }
     }
 
+    private String findProjectVersion(File path) {
+        MavenResult result = excuteCommand("help:evaluate -Dexpression=project.version", path);
+        if (!result.isSuccess()) {
+            return null;
+        }
+
+        /* Unfortunately maven prints a lot of [INFO] spam. The version number is also part of the
+         * INFO channel output, but luckily the help plugin adds a newline between the [INFO] and
+         * the version
+         */
+        String ret = null;
+        String[] lines = result.getOutput().split("\n");
+        for(String i : lines) {
+            /* Skip all lines starting with [, this is maven debug output */
+            if (i.length() == 0 || i.charAt(0) == '[') {
+                continue;
+            }
+            /* We expect only one result line */
+            if (ret != null) {
+                return null;
+            }
+            ret = i;
+        }
+        return ret;
+    }
+
     @Override
     public String deploy(final OpenEngSBFileModel path) {
         final String id = createId();
@@ -301,8 +327,9 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
                 MavenResult result = excuteCommand(command, path.getFile());
                 deployEvents.raiseEvent(new DeployStartEvent(id));
                 if (result.isSuccess()) {
-                    deployEvents.raiseEvent(new DeploySuccessEvent(id, result
-                            .getOutput()));
+                    String version = findProjectVersion(path.getFile());
+                    deployEvents.raiseEvent(new DeploySuccessEvent(id,
+                            result.getOutput(), version));
                 } else {
                     deployEvents.raiseEvent(new DeployFailEvent(id, result
                             .getOutput()));
@@ -323,8 +350,9 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
                 MavenResult result = excuteCommand(command, path.getFile());
                 deployEvents.raiseEvent(new DeployStartEvent(processId));
                 if (result.isSuccess()) {
+                    String version = findProjectVersion(path.getFile());
                     deployEvents.raiseEvent(new DeploySuccessEvent(processId,
-                            result.getOutput()));
+                            result.getOutput(), version));
                 } else {
                     deployEvents.raiseEvent(new DeployFailEvent(processId,
                             result.getOutput()));

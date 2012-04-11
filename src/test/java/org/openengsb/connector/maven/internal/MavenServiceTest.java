@@ -131,7 +131,7 @@ public class MavenServiceTest {
         mavenService.setCommand("install -Dmaven.test.skip=true");
         String id = mavenService.deploy(getFileModel("test-unit-success"));
         verify(deployEvents).raiseEvent(any(DeployStartEvent.class));
-        verify(deployEvents).raiseEvent(refEq(new DeploySuccessEvent(id, null), "output"));
+        verify(deployEvents).raiseEvent(refEq(new DeploySuccessEvent(id, null, "1.0-SNAPSHOT"), "output"));
     }
 
     @Test
@@ -140,7 +140,7 @@ public class MavenServiceTest {
         long id = 42;
         mavenService.deploy(getFileModel("test-unit-success"), id);
         verify(deployEvents).raiseEvent(any(DeployStartEvent.class));
-        verify(deployEvents).raiseEvent(refEq(new DeploySuccessEvent(id, null), "output"));
+        verify(deployEvents).raiseEvent(refEq(new DeploySuccessEvent(id, null, "1.0-SNAPSHOT"), "output"));
     }
 
     @Ignore("no idea why this fails, it works from cmd-line")
