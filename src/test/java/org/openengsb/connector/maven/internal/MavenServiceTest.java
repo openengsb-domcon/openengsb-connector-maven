@@ -43,7 +43,6 @@ import org.mockito.stubbing.Answer;
 import org.openengsb.core.api.AliveState;
 import org.openengsb.core.api.context.ContextCurrentService;
 import org.openengsb.core.api.model.OpenEngSBFileModel;
-import org.openengsb.core.common.util.ModelUtils;
 import org.openengsb.domain.build.BuildDomainEvents;
 import org.openengsb.domain.build.BuildStartEvent;
 import org.openengsb.domain.build.BuildSuccessEvent;
@@ -288,7 +287,7 @@ public class MavenServiceTest {
     }
 
     private OpenEngSBFileModel getFileModel(String folder) {
-        OpenEngSBFileModel m = ModelUtils.createEmptyModelObject(OpenEngSBFileModel.class);
+        OpenEngSBFileModel m = new OpenEngSBFileModel();
         m.setFile(new File(getPath(folder)));
         return m;
     }

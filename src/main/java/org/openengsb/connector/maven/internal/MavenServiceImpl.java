@@ -46,7 +46,6 @@ import org.openengsb.core.api.context.ContextCurrentService;
 import org.openengsb.core.api.context.ContextHolder;
 import org.openengsb.core.api.model.OpenEngSBFileModel;
 import org.openengsb.core.common.AbstractOpenEngSBConnectorService;
-import org.openengsb.core.common.util.ModelUtils;
 import org.openengsb.domain.build.BuildDomain;
 import org.openengsb.domain.build.BuildDomainEvents;
 import org.openengsb.domain.build.BuildFailEvent;
@@ -193,7 +192,7 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
                 MavenResult result = excuteCommand(command, path.getFile());
                 testEvents.raiseTestStartEvent(new TestStartEvent(id));
                 if (result.isSuccess()) {
-                    OpenEngSBFileModel outPath = ModelUtils.createEmptyModelObject(OpenEngSBFileModel.class);
+                    OpenEngSBFileModel outPath = new OpenEngSBFileModel();
                     outPath.setFile(path.getFile());
                     testEvents.raiseTestSuccessEvent(new TestSuccessEvent(id, result
                             .getOutput(), outPath));
@@ -217,7 +216,7 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
                 MavenResult result = excuteCommand(command, path.getFile());
                 testEvents.raiseTestStartEvent(new TestStartEvent(processId));
                 if (result.isSuccess()) {
-                    OpenEngSBFileModel outPath = ModelUtils.createEmptyModelObject(OpenEngSBFileModel.class);
+                    OpenEngSBFileModel outPath = new OpenEngSBFileModel();
                     outPath.setFile(path.getFile());
                     testEvents.raiseTestSuccessEvent(new TestSuccessEvent(processId,
                             result.getOutput(), outPath));
@@ -241,7 +240,7 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
                 MavenResult result = excuteCommand(command, path.getFile());
                 buildEvents.raiseEvent(new BuildStartEvent(id));
                 if (result.isSuccess()) {
-                    OpenEngSBFileModel outPath = ModelUtils.createEmptyModelObject(OpenEngSBFileModel.class);
+                    OpenEngSBFileModel outPath = new OpenEngSBFileModel();
                     outPath.setFile(path.getFile());
                     buildEvents.raiseEvent(new BuildSuccessEvent(id, result
                             .getOutput(), outPath));
@@ -267,7 +266,7 @@ public class MavenServiceImpl extends AbstractOpenEngSBConnectorService implemen
                 buildStartEvent.setProcessId(processId);
                 buildEvents.raiseEvent(buildStartEvent);
                 if (result.isSuccess()) {
-                    OpenEngSBFileModel outPath = ModelUtils.createEmptyModelObject(OpenEngSBFileModel.class);
+                    OpenEngSBFileModel outPath = new OpenEngSBFileModel();
                     outPath.setFile(path.getFile());
                     buildEvents.raiseEvent(new BuildSuccessEvent(processId,
                             result.getOutput(), outPath));
